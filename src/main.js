@@ -1,8 +1,8 @@
 import Vue from 'vue';
-import App from './App.vue';
+import Map from './Map.vue';
 
-Vue.config.productionTip = false;
-
+// eslint-disable-next-line
 new Vue({
-  render: h => h(App),
-}).$mount('#app');
+  el: '#app',
+  render: h => h(Map),
+});
