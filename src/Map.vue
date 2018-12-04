@@ -124,8 +124,6 @@ export default {
               processed.Day = this.dayOfTheWeek[index];
             }
           });
-          console.log(dayAndTime);
-          console.log(processed.Day);
           processedData.push(processed);
         }
       });
