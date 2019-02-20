@@ -5,8 +5,6 @@
 </template>
 
 <script>
-import Papa from 'papaparse';
-import _ from 'lodash';
 import L from 'leaflet';
 import 'leaflet.featuregroup.subgroup';
 import 'leaflet.markercluster';
@@ -23,6 +21,7 @@ import 'leaflet-pulse-icon/dist/L.Icon.Pulse.css';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import MobileLibraries from './MobileLibraries';
 
 // eslint-disable-next-line
 delete L.Icon.Default.prototype._getIconUrl;
@@ -55,29 +54,30 @@ export default {
   mounted() {
     this.loadMap();
     this.setCurrentLocation();
+    this.mobileLibraries = new MobileLibraries(this.map);
   },
 
   methods: {
     loadMap() {
       this.defineMap();
       this.loadTileLayer();
-      this.getLayersFromCSV();
+      // this.getLayersFromCSV();
     },
 
-    addControlLayers() {
-      this.controlLayers = L.control.layers(null, null, { collapsed: false });
-      this.markers = L.markerClusterGroup();
-      this.markers.addTo(this.map);
-      _.keys(this.mobileLibraries).forEach((key) => {
-        const group = L.featureGroup.subGroup(
-          this.markers,
-          this.mobileLibraries[key],
-        );
-        this.controlLayers.addOverlay(group, key);
-        group.addTo(this.map);
-      });
-      this.controlLayers.addTo(this.map);
-    },
+    // addControlLayers() {
+    //   this.controlLayers = L.control.layers(null, null, { collapsed: false });
+    //   this.markers = L.markerClusterGroup();
+    //   this.markers.addTo(this.map);
+    //   _.keys(this.mobileLibraries).forEach((key) => {
+    //     const group = L.featureGroup.subGroup(
+    //       this.markers,
+    //       this.mobileLibraries[key],
+    //     );
+    //     this.controlLayers.addOverlay(group, key);
+    //     group.addTo(this.map);
+    //   });
+    //   this.controlLayers.addTo(this.map);
+    // },
 
     loadTileLayer() {
       this.tileLayer = L.tileLayer(
@@ -99,84 +99,84 @@ export default {
       });
     },
 
-    getLayersFromCSV() {
-      const self = this;
-      Papa.parse('directoryexport16.csv', {
-        download: true,
-        header: true,
-        complete: function complete(results) {
-          self.processCSVDataToSplitDateAndTime(results.data);
-          self.setMarkersForMobileLibraries();
-          self.addControlLayers();
-        },
-      });
-    },
+    // getLayersFromCSV() {
+    //   const self = this;
+    //   Papa.parse('directoryexport16.csv', {
+    //     download: true,
+    //     header: true,
+    //     complete: function complete(results) {
+    //       self.processCSVDataToSplitDateAndTime(results.data);
+    //       self.setMarkersForMobileLibraries();
+    //       self.addControlLayers();
+    //     },
+    //   });
+    // },
 
-    processCSVDataToSplitDateAndTime(data) {
-      const processedData = [];
-      data.forEach((library) => {
-        let processed = {};
-        processed = JSON.parse(JSON.stringify(library));
-        const dayAndTime = library['Day and time'];
-        if (dayAndTime) {
-          this.regexDayOfTheWeek.forEach((expression, index) => {
-            if (expression.test(dayAndTime)) {
-              processed.Day = this.dayOfTheWeek[index];
-            }
-          });
-          processedData.push(processed);
-        }
-      });
+    // processCSVDataToSplitDateAndTime(data) {
+    //   const processedData = [];
+    //   data.forEach((library) => {
+    //     let processed = {};
+    //     processed = JSON.parse(JSON.stringify(library));
+    //     const dayAndTime = library['Day and time'];
+    //     if (dayAndTime) {
+    //       this.regexDayOfTheWeek.forEach((expression, index) => {
+    //         if (expression.test(dayAndTime)) {
+    //           processed.Day = this.dayOfTheWeek[index];
+    //         }
+    //       });
+    //       processedData.push(processed);
+    //     }
+    //   });
 
-      this.layers = processedData;
-    },
+    //   this.layers = processedData;
+    // },
 
-    setMarkersForMobileLibraries() {
-      this.mobileLibraries = this.getMarkersFromObjectGroupOrderedByWeekDay(
-        _.groupBy(this.layers, 'Day'),
-      );
-    },
+    // setMarkersForMobileLibraries() {
+    //   this.mobileLibraries = this.getMarkersFromObjectGroupOrderedByWeekDay(
+    //     _.groupBy(this.layers, 'Day'),
+    //   );
+    // },
 
-    getMarkersFromObjectGroupOrderedByWeekDay(layers) {
-      const markers = {};
+    // getMarkersFromObjectGroupOrderedByWeekDay(layers) {
+    //   const markers = {};
 
-      _.keys(layers).forEach((key) => {
-        const values = [];
-        layers[key].forEach((el) => {
-          if (el.Location) {
-            values.push(this.generateMarker(el));
-          }
-        });
-        markers[key] = values;
-      });
+    //   _.keys(layers).forEach((key) => {
+    //     const values = [];
+    //     layers[key].forEach((el) => {
+    //       if (el.Location) {
+    //         values.push(this.generateMarker(el));
+    //       }
+    //     });
+    //     markers[key] = values;
+    //   });
 
-      return this.orderObjectByWeekDay(markers);
-    },
+    //   return this.orderObjectByWeekDay(markers);
+    // },
 
-    generateMarker(el) {
-      let popup = el.Name;
-      const address = el.Address;
-      if (address) {
-        if (address.includes(popup)) {
-          popup = address;
-        } else {
-          popup = `${popup}<br> ${address}`;
-        }
-      }
-      popup = `${popup} <br> ${el['Day and time']}`;
-      // eslint-disable-next-line
-      return L.marker(el.Location.split(",")).bindPopup(popup);
-    },
+    // generateMarker(el) {
+    //   let popup = el.Name;
+    //   const address = el.Address;
+    //   if (address) {
+    //     if (address.includes(popup)) {
+    //       popup = address;
+    //     } else {
+    //       popup = `${popup}<br> ${address}`;
+    //     }
+    //   }
+    //   popup = `${popup} <br> ${el['Day and time']}`;
+    //   // eslint-disable-next-line
+    //   return L.marker(el.Location.split(",")).bindPopup(popup);
+    // },
 
-    orderObjectByWeekDay(objectToOrder) {
-      const orderedObject = {};
+    // orderObjectByWeekDay(objectToOrder) {
+    //   const orderedObject = {};
 
-      this.dayOfTheWeek.forEach((dayOfWeek) => {
-        orderedObject[dayOfWeek] = objectToOrder[dayOfWeek];
-      });
+    //   this.dayOfTheWeek.forEach((dayOfWeek) => {
+    //     orderedObject[dayOfWeek] = objectToOrder[dayOfWeek];
+    //   });
 
-      return orderedObject;
-    },
+    //   return orderedObject;
+    // },
 
     setCurrentLocation() {
       const pulsingIcon = L.icon.pulse({ iconSize: [8, 8], color: 'red' });
